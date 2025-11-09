@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>রিয়ালিস্টিক খাম</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #F2F2F2 0%, #EAE7E8 100%);
+            overflow: hidden;
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            body {
+                background: linear-gradient(135deg, #DC10DA 0%, #DC10DA 100%);
+            }
+        }
+
+        .envelope-wrapper {
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .envelope-wrapper:hover {
+            transform: scale(1.05);
+        }
+
+        .envelope {
+            position: relative;
+            width: 320px;
+            height: 200px;
+        }
+
+        /* Envelope body */
+        .envelope-body {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #f4e7d7 0%, #e8d5c0 100%);
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Inner border decoration */
+        .envelope-body::before {
+            content: '';
+            position: absolute;
+            inset: 12px;
+            border: 2px solid #d4b896;
+            border-radius: 2px;
+            pointer-events: none;
+        }
+
+        /* Name in bottom right */
+        .envelope-name {
+            position: absolute;
+            bottom: 20px;
+            right: 25px;
+            font-family: 'Brush Script MT', cursive;
+            font-size: 24px;
+            color: #8b6f47;
+            font-weight: bold;
+            font-style: italic;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
+            z-index: 1;
+        }
+
+        /* Envelope flap (top part) */
+        .envelope-flap {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: top center;
+            transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 4;
+        }
+
+        /* Flap back (the visible part) */
+        .flap-back {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 100px solid #d4b896;
+            filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+        }
+
+        /* Flap front overlay */
+        .flap-front {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 160px solid transparent;
+            border-right: 160px solid transparent;
+            border-top: 100px solid #e8d5c0;
+            filter: brightness(1.1);
+        }
+
+        /* When envelope is open */
+        .envelope.open .envelope-flap {
+            transform: rotateX(180deg);
+        }
+
+        /* Letter/Image inside */
+        .letter {
+            position: fixed;
+            width:300px;
+            height: 380px;
+            background: white;
+            border-radius: 4px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.4);
+            overflow: hidden;
+            opacity: 0;
+            pointer-events: none;
+            z-index: 10;
+            transition: all 1.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .letter img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Letter initial position (inside envelope) */
+        .letter.inside {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.3) translateY(20px);
+            opacity: 0;
+        }
+
+        /* Letter showing position (center of screen) */
+        .letter.showing {
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(1) translateY(0);
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Add stamp decoration */
+        .stamp {
+            position: absolute;
+            top: 20px;
+            right: 25px;
+            width: 50px;
+            height: 50px;
+            background: url('https://weareapairpranjalishome.github.io/pranjali/profile.png');
+            background-size: cover;
+            border-radius: 25px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            z-index: 2;
+        }
+
+        .stamp::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 28px;
+            
+        }
+
+        /* Backdrop for when letter is showing */
+        .backdrop {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0);
+            pointer-events: none;
+            transition: background 0.5s ease;
+            z-index: 9;
+        }
+
+        .backdrop.active {
+            background: rgba(232,208,181, 0.7);
+            pointer-events: auto;
+        }
+
+        /* Mobile responsiveness */
+        @media (max-width: 768px) {
+            .envelope {
+                width: 280px;
+                height: 175px;
+            }
+
+            .flap-back,
+            .flap-front {
+                border-left: 140px solid transparent;
+                border-right: 140px solid transparent;
+                border-top: 87.5px solid;
+            }
+
+            .flap-back {
+                border-top-color: #d4b896;
+            }
+
+            .flap-front {
+                border-top-color: #e8d5c0;
+            }
+
+            .letter {
+                width: 90%;
+                max-width: 320px;
+                height: auto;
+                aspect-ratio: 280/380;
+            }
+
+            .envelope-name {
+                font-size: 20px;
+                bottom: 15px;
+                right: 20px;
+            }
+
+            .stamp {
+                width: 40px;
+                height: 40px;
+                top: 15px;
+                right: 20px;
+            }
+
+            .stamp::before {
+                font-size: 22px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Backdrop -->
+    <div class="backdrop" id="backdrop"></div>
+
+    <!-- Envelope -->
+    <div class="envelope-wrapper" id="envelopeWrapper">
+        <div class="envelope" id="envelope">
+            <!-- Envelope body -->
+            <div class="envelope-body">
+                <div class="stamp"></div>
+                <div class="envelope-name">Pranjali</div>
+            </div>
+
+            <!-- Envelope flap -->
+            <div class="envelope-flap">
+                <div class="flap-back"></div>
+                <div class="flap-front"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Letter/Image -->
+    <div class="letter inside" id="letter">
+        <img src="https://suprovat-creator.github.io/pranjali/6.jpg" alt="Letter">
+    </div>
+
+    <script>
+        const envelope = document.getElementById('envelope');
+        const envelopeWrapper = document.getElementById('envelopeWrapper');
+        const letter = document.getElementById('letter');
+        const backdrop = document.getElementById('backdrop');
+
+        let isOpen = false;
+
+        // Envelope click handler
+        envelopeWrapper.addEventListener('click', (e) => {
+            e.stopPropagation();
+
+            if (!isOpen) {
+                // Open envelope
+                envelope.classList.add('open');
+
+                // Show letter after flap animation
+                setTimeout(() => {
+                    letter.classList.remove('inside');
+                    letter.classList.add('showing');
+                    backdrop.classList.add('active');
+                    isOpen = true;
+                }, 600); // Wait for flap to open
+            }
+        });
+
+        // Backdrop click handler (close envelope)
+        backdrop.addEventListener('click', () => {
+            if (isOpen) {
+                // Hide letter
+                letter.classList.remove('showing');
+                letter.classList.add('inside');
+                backdrop.classList.remove('active');
+
+                // Close envelope flap after letter goes back
+                setTimeout(() => {
+                    envelope.classList.remove('open');
+                    isOpen = false;
+                }, 800); // Wait for letter to go back
+            }
+        });
+
+        // Prevent letter click from closing
+        letter.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    </script>
+</body>
+</html>
