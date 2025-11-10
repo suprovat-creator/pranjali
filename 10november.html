@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Good morning, Prańjali! Today is November 10, 2025</title>
+    <style>
+       
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #9E0F81 0%, #222020 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            cursor: default;
+        }
+
+        body.heart-cursor {
+            cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="red"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>') 12 12, auto;
+        }
+
+        .container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .envelope {
+            position: relative;
+            width: 300px;
+            height: 200px;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+            z-index: 10;
+        }
+
+        .envelope:hover {
+            transform: scale(1.05);
+        }
+
+        .envelope-body {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(145deg, #FBEAF0, #E7D8E6);
+            border-radius: 5px;
+            box-shadow: 
+                0 15px 35px rgba(0, 0, 0, 0.3),
+                inset 0 2px 5px rgba(255, 255, 255, 0.3);
+        }
+
+        .envelope-flap {
+            position: absolute;
+            top: -1px;
+            left: 0;
+            width: 100%;
+            height: 120px;
+             border-radius: 5px 5px 0px 0px;
+            background: linear-gradient(145deg, #E7CFE6, #F7DBDD);
+            clip-path: polygon(0 0, 100% 0, 50% 100%);
+            transform-origin: 50% 0%;
+            transition: transform 0.6s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            z-index: 11;
+        }
+
+        .envelope.opened .envelope-flap {
+            transform: rotateX(-180deg);
+        }
+
+        .envelope-name {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            color: #9E0F81;
+            font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+            font-size: 20px;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px rgba(255, 255, 255, 0.8);
+            z-index: 12;
+        }
+
+        .card {
+            position: absolute;
+            width: 320px;
+            height: 450px;
+            background: #f8f9fa;
+            border-radius: 7px;
+            box-shadow: 
+                0 20px 60px rgba(158, 15, 129, 0.4),
+                0 10px 30px rgba(0, 0, 0, 0.2);
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            opacity: 0;
+            transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            z-index: 5;
+            
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        .card.emerging {
+            transform: translate(-50%, -150%) scale(0.6);
+            opacity: 1;
+            z-index: 15;
+        }
+
+        .card.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+            z-index: 15;
+        }
+
+        .card.closing {
+            transform: translate(-50%, -150%) scale(0.6);
+            opacity: 1;
+            z-index: 15;
+        }
+
+        .card-image {
+            width: 100%;
+            height: auto;
+            border-radius: 5px;
+            object-fit: cover;
+            
+            animation: float 3s ease-in-out infinite;
+            position: relative;
+        }
+        
+        .card-author {
+            position: absolute;
+            bottom: 45px;
+            right: 30px;
+            color: #fff;
+            font-family: 'Brush Script MT', 'Lucida Handwriting', cursive;
+            font-size: 22px;
+            animation: float 3s ease-in-out infinite;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+            z-index: 10;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .card-content {
+            color: #9E0F81;
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            font-weight: bold;
+        }
+
+        .card-message {
+            color: #222020;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+       
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 12;
+        }
+
+        .overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bubbles-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .bubbles-container.active {
+            opacity: 1;
+        }
+
+        .bubble {
+            position: absolute;
+            border-radius: 50%;
+            animation: blink 1.5s infinite, float-bubble 4s infinite linear;
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        @keyframes float-bubble {
+            0% { transform: translateY(100vh) rotate(0deg); }
+            100% { transform: translateY(-100px) rotate(360deg); }
+        }
+
+        .balloons-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 25;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .balloons-container.active {
+            opacity: 1;
+        }
+
+        .balloon {
+            position: absolute;
+            animation: float-balloon 8s infinite linear;
+        }
+
+        .balloon-body {
+            width: 60px;
+            height: 80px;
+            border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            padding: 5px;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+        }
+
+        .balloon-string {
+            width: 2px;
+            height: 40px;
+            background: #666;
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        @keyframes float-balloon {
+            0% { 
+                transform: translateY(100vh) rotate(0deg); 
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% { 
+                transform: translateY(-150px) rotate(10deg); 
+                opacity: 0;
+            }
+        }
+
+        .instruction {
+            position: absolute;
+            bottom: 50px;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 16px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.6; }
+            50% { opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .envelope {
+                width: 300px;
+                height: 200px;
+            }
+            
+            .card {
+                width: 320px;
+                height: 450px;
+                
+            }
+            
+            .card-content {
+                font-size: 20px;
+            }
+            
+            .card-message {
+                font-size: 14px;
+            }
+
+            .envelope-name {
+                font-size: 18px;
+                bottom: 12px;
+                right: 12px;
+            }
+
+            .balloon-body {
+                width: 45px;
+                height: 60px;
+                font-size: 8px;
+            }
+        }
+    </style>
+</head>
+<body onmousedown="ab.play()">
+    <div class="container">
+        <div class="envelope" id="envelope">
+            <div class="envelope-body"></div>
+            <div class="envelope-flap"></div>
+            <div class="envelope-name">Pranjali</div>
+        </div>
+        
+        <div class="card" id="card">
+            <div style="position: relative;">
+                <img src="https://suprovat-creator.github.io/pranjali/10.jpg" alt="Card Image" class="card-image">
+                <div class="card-author">Kabir</div>
+            </div>
+           
+            <div class="heart"></div>
+        </div>
+        
+        <div class="overlay" id="overlay"></div>
+        <div class="sparkles" id="sparkles"></div>
+        <div class="bubbles-container" id="bubblesContainer"></div>
+        <div class="balloons-container" id="balloonsContainer"></div>
+        
+        
+    </div>
+
+    <script>
+        const envelope = document.getElementById('envelope');
+        const card = document.getElementById('card');
+        const overlay = document.getElementById('overlay');
+        const sparkles = document.getElementById('sparkles');
+        const bubblesContainer = document.getElementById('bubblesContainer');
+        const balloonsContainer = document.getElementById('balloonsContainer');
+        const instruction = document.querySelector('.instruction');
+        
+        let isCardOpen = false;
+        let bubblesActive = false;
+        let balloonsActive = false;
+        let bubbleInterval;
+        let balloonInterval;
+
+        // Create sparkles effect
+        function createSparkles() {
+            for (let i = 0; i < 20; i++) {
+                const sparkle = document.createElement('div');
+                sparkle.className = 'sparkle';
+                sparkle.style.left = Math.random() * 100 + '%';
+                sparkle.style.top = Math.random() * 100 + '%';
+                sparkle.style.animationDelay = Math.random() * 1.5 + 's';
+                sparkles.appendChild(sparkle);
+            }
+        }
+
+        // Create colorful bubbles
+        function createBubble() {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            
+            // Random colors
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3', '#54A0FF', '#F0932B'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Random size
+            const size = Math.random() * 30 + 15;
+            
+            // Random position
+            const left = Math.random() * 100;
+            
+            bubble.style.background = color;
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.left = left + '%';
+            bubble.style.animationDuration = (Math.random() * 3 + 2) + 's';
+            bubble.style.boxShadow = `0 0 10px ${color}`;
+            
+            bubblesContainer.appendChild(bubble);
+            
+            // Remove bubble after animation
+            setTimeout(() => {
+                if (bubble.parentNode) {
+                    bubble.remove();
+                }
+            }, 5000);
+        }
+
+        // Create colorful balloons with text
+        function createBalloon() {
+            const balloon = document.createElement('div');
+            balloon.className = 'balloon';
+            
+            // Random colors
+            const colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FECA57', '#FF9FF3', '#54A0FF', '#F0932B', '#FF5722', '#9C27B0'];
+            const color = colors[Math.floor(Math.random() * colors.length)];
+            
+            // Random position
+            const left = Math.random() * 90;
+            
+            // Random size variation
+            const sizeMultiplier = Math.random() * 0.5 + 0.8; // 0.8 to 1.3
+            
+            balloon.innerHTML = `
+                <div class="balloon-body" style="background: ${color}; transform: scale(${sizeMultiplier});">
+                    I ♥ you (Pranjali)
+                </div>
+                <div class="balloon-string"></div>
+            `;
+            
+            balloon.style.left = left + '%';
+            balloon.style.animationDuration = (Math.random() * 2 + 6) + 's';
+            balloon.style.animationDelay = Math.random() * 2 + 's';
+            
+            balloonsContainer.appendChild(balloon);
+            
+            // Remove balloon after animation
+            setTimeout(() => {
+                if (balloon.parentNode) {
+                    balloon.remove();
+                }
+            }, 10000);
+        }
+
+        function startBubbles() {
+            if (bubblesActive) return;
+            bubblesActive = true;
+            bubblesContainer.classList.add('active');
+            
+            // Create bubbles continuously
+            bubbleInterval = setInterval(createBubble, 200);
+        }
+
+        function stopBubbles() {
+            if (!bubblesActive) return;
+            bubblesActive = false;
+            bubblesContainer.classList.remove('active');
+            
+            if (bubbleInterval) {
+                clearInterval(bubbleInterval);
+            }
+            
+            // Clear existing bubbles
+            setTimeout(() => {
+                bubblesContainer.innerHTML = '';
+            }, 300);
+        }
+
+        function startBalloons() {
+            if (balloonsActive) return;
+            balloonsActive = true;
+            balloonsContainer.classList.add('active');
+            document.body.classList.add('heart-cursor');
+            
+            // Create balloons continuously
+            balloonInterval = setInterval(createBalloon, 800);
+        }
+
+        function stopBalloons() {
+            if (!balloonsActive) return;
+            balloonsActive = false;
+            balloonsContainer.classList.remove('active');
+            document.body.classList.remove('heart-cursor');
+            
+            if (balloonInterval) {
+                clearInterval(balloonInterval);
+            }
+            
+            // Clear existing balloons
+            setTimeout(() => {
+                balloonsContainer.innerHTML = '';
+            }, 300);
+        }
+
+        function openCard() {
+            if (isCardOpen) return;
+            
+            isCardOpen = true;
+            envelope.classList.add('opened');
+            startBubbles();
+            startBalloons();
+            
+            // First stage: Card emerges upward from envelope
+            setTimeout(() => {
+                card.classList.add('emerging');
+                instruction.style.opacity = '0';
+            }, 300);
+            
+            // Second stage: Card moves to center and scales up
+            setTimeout(() => {
+                card.classList.remove('emerging');
+                card.classList.add('active');
+                overlay.classList.add('active');
+                createSparkles();
+            }, 1000);
+        }
+
+        function closeCard() {
+            if (!isCardOpen) return;
+            
+            isCardOpen = false;
+            sparkles.innerHTML = '';
+            stopBubbles();
+            stopBalloons();
+            
+            // First stage: Card moves upward (closing stage)
+            card.classList.remove('active');
+            card.classList.add('closing');
+            overlay.classList.remove('active');
+            
+            // Second stage: Card comes back to center and disappears
+            setTimeout(() => {
+                card.classList.remove('closing');
+                envelope.classList.remove('opened');
+                instruction.style.opacity = '0.6';
+            }, 600);
+        }
+
+        envelope.addEventListener('click', (e) => {
+            e.stopPropagation();
+            openCard();
+        });
+
+        overlay.addEventListener('click', closeCard);
+        
+        document.addEventListener('click', (e) => {
+            if (isCardOpen && !card.contains(e.target)) {
+                closeCard();
+            }
+        });
+
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+     <script>
+    var ab = new Audio();
+    ab.src = "https://weareapairpranjalishome.github.io/pranjali/Headlights.mp3";
+   </script>
+</body>
+</html>
